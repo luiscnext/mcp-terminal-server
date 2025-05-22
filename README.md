@@ -2,6 +2,52 @@
 
 A comprehensive, security-focused MCP (Model Context Protocol) TypeScript SDK server that provides safe terminal command execution capabilities for Claude Desktop. This server implements enterprise-grade security controls following all MCP security requirements.
 
+## 🚀 Quick Start with npx
+
+The easiest way to use this server is with npx - no installation required!
+
+### Prerequisites
+- Node.js 18+ 
+- Claude Desktop
+
+### Usage
+
+Simply add the server to your Claude Desktop configuration using npx:
+
+**Claude Desktop Configuration**: `~/.claude_desktop_config.json` (macOS) or `%APPDATA%/Claude/claude_desktop_config.json` (Windows)
+
+```json
+{
+  "servers": {
+    "secure-terminal": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/mcp-terminal-server"]
+    }
+  }
+}
+```
+
+That's it! Claude Desktop will automatically download and run the server when needed.
+
+### Alternative: Global Installation
+
+If you prefer to install globally:
+
+```bash
+npm install -g @modelcontextprotocol/mcp-terminal-server
+```
+
+Then configure Claude Desktop:
+```json
+{
+  "servers": {
+    "secure-terminal": {
+      "command": "mcp-terminal-server"
+    }
+  }
+}
+```
+
 ## 🛡️ Security Features
 
 This server addresses all major security requirements and threat vectors identified in the MCP security documentation:
@@ -32,60 +78,6 @@ This server addresses all major security requirements and threat vectors identif
 - **Timeout Enforcement**: Commands automatically terminated
 - **Process Isolation**: Secure environment for command execution
 
-## 🚀 Quick Start
-
-### Prerequisites
-- Node.js 18+ 
-- Claude Desktop
-- TypeScript knowledge (optional)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/luiscnext/mcp-terminal-server.git
-   cd mcp-terminal-server
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Build the server**
-   ```bash
-   npm run build
-   ```
-
-4. **Test the server**
-   ```bash
-   npm test
-   ```
-
-### Claude Desktop Configuration
-
-Add the server to your Claude Desktop configuration:
-
-**Location**: `~/.claude_desktop_config.json` (macOS) or `%APPDATA%/Claude/claude_desktop_config.json` (Windows)
-
-```json
-{
-  "servers": {
-    "secure-terminal": {
-      "command": "node",
-      "args": ["/path/to/mcp-terminal-server/dist/server.js"],
-      "env": {}
-    }
-  }
-}
-```
-
-### Start the Server
-
-```bash
-npm start
-```
-
 ## 🛠️ Available Tools
 
 ### Core Tools
@@ -101,9 +93,6 @@ Parameters:
 
 #### `get_current_directory`
 Get the current working directory.
-```
-No parameters required
-```
 
 #### `execute_safe_command`
 Execute commands from the security whitelist.
@@ -185,81 +174,6 @@ All dangerous commands are explicitly forbidden:
 - Script execution: `python`, `node`, `bash`
 - And many more...
 
-## 🔍 Security Architecture
-
-### Input Validation Pipeline
-1. **Sanitization** - Remove dangerous characters and patterns
-2. **Whitelist Check** - Verify command is approved
-3. **Argument Validation** - Check all parameters
-4. **Path Validation** - Prevent directory traversal
-5. **Rate Limiting** - Enforce usage limits
-
-### Output Sanitization Pipeline
-1. **Credential Detection** - Identify and redact secrets
-2. **Size Limiting** - Prevent excessive output
-3. **Content Filtering** - Remove sensitive information
-4. **ANSI Stripping** - Clean terminal codes
-5. **Safe Error Messages** - Prevent information leakage
-
-### Audit Logging
-All operations are logged with:
-- Timestamp and event type
-- Client identification
-- Command details
-- Success/failure status
-- Security violations
-- Performance metrics
-
-## 📚 Documentation
-
-- [Security Policy](./SECURITY.md) - Detailed security information
-- [Setup Guide](./docs/setup.md) - Comprehensive setup instructions
-- [API Documentation](./docs/api.md) - Tool and resource reference
-- [Security Guide](./docs/security.md) - Security best practices
-
-## 🔨 Development
-
-### Scripts
-- `npm run build` - Build TypeScript to JavaScript
-- `npm run dev` - Development mode with auto-reload
-- `npm test` - Run security tests
-- `npm run lint` - Code linting
-- `npm run format` - Code formatting
-
-### Project Structure
-```
-mcp-terminal-server/
-├── src/
-│   ├── commands/
-│   │   ├── whitelist.ts     # Command definitions
-│   │   ├── validator.ts     # Input validation
-│   │   └── executor.ts      # Safe execution
-│   ├── security/
-│   │   ├── sanitizer.ts     # Input/output cleaning
-│   │   ├── rateLimit.ts     # Rate limiting
-│   │   └── audit.ts         # Security logging
-│   └── server.ts            # Main MCP server
-├── docs/                    # Documentation
-├── examples/                # Usage examples
-└── logs/                    # Security audit logs
-```
-
-## 🚨 Security Best Practices
-
-### For Developers
-1. **Never bypass security checks** - All validation is mandatory
-2. **Review command additions** - New commands require security analysis
-3. **Monitor audit logs** - Watch for suspicious patterns
-4. **Update dependencies** - Keep security patches current
-5. **Test thoroughly** - Run security tests before deployment
-
-### For Users
-1. **Review available commands** - Understand what's allowed
-2. **Monitor rate limits** - Avoid excessive usage
-3. **Check security status** - Use the security_status resource
-4. **Report issues** - Submit security concerns immediately
-5. **Keep updated** - Use latest versions
-
 ## 🛡️ Rate Limiting
 
 The server implements sophisticated rate limiting:
@@ -281,6 +195,7 @@ The server implements sophisticated rate limiting:
 ## 📊 Monitoring
 
 ### Log Files
+When running, the server creates logs in the current directory:
 - `logs/security-audit.log` - All security events
 - `logs/security-alerts.log` - High-risk events only
 - `logs/combined.log` - General application logs
@@ -298,15 +213,82 @@ tail -f logs/security-alerts.log
 grep "RATE_LIMIT_EXCEEDED" logs/security-audit.log
 ```
 
-## 🤝 Contributing
+## 📚 Usage Examples
 
-Please read our [Security Policy](./SECURITY.md) before contributing. All contributions must:
+Once configured with Claude Desktop, you can ask Claude to:
 
-1. Pass security tests
-2. Follow coding standards
-3. Include documentation
-4. Maintain backward compatibility
-5. Not introduce new security risks
+- **List directories**: "Show me the files in the current directory"
+- **Check Git status**: "What's the status of this Git repository?"
+- **Read files safely**: "Show me the first 50 lines of package.json"
+- **Get system info**: "What user am I running as?"
+- **Execute safe commands**: "Run 'npm list' to show installed packages"
+- **Check security status**: "Show me the current security status"
+
+## 🔨 Development
+
+### Local Development
+
+1. **Clone and setup**
+   ```bash
+   git clone https://github.com/luiscnext/mcp-terminal-server.git
+   cd mcp-terminal-server
+   npm install
+   ```
+
+2. **Build and test**
+   ```bash
+   npm run build
+   npm test
+   npm run test:security
+   ```
+
+3. **Run locally**
+   ```bash
+   npm run dev
+   ```
+
+### Scripts
+- `npm run build` - Build TypeScript to JavaScript
+- `npm run dev` - Development mode with auto-reload
+- `npm test` - Run security tests
+- `npm run lint` - Code linting
+- `npm run format` - Code formatting
+
+## 📦 Publishing
+
+To publish this package to npm:
+
+1. **Build and test**
+   ```bash
+   npm run build
+   npm test
+   ```
+
+2. **Login to npm**
+   ```bash
+   npm login
+   ```
+
+3. **Publish**
+   ```bash
+   npm publish
+   ```
+
+The package is configured with proper `publishConfig` for npm registry.
+
+## 🚨 Security Best Practices
+
+### For Users
+1. **Monitor logs** - Check security audit logs regularly
+2. **Update frequently** - Keep the package updated
+3. **Review commands** - Understand what commands are available
+4. **Report issues** - Submit security concerns immediately
+
+### For Developers
+1. **Never bypass security checks** - All validation is mandatory
+2. **Review command additions** - New commands require security analysis
+3. **Monitor audit logs** - Watch for suspicious patterns
+4. **Test thoroughly** - Run security tests before deployment
 
 ## 📄 License
 
@@ -316,7 +298,7 @@ MIT License - see [LICENSE](./LICENSE) file for details.
 
 - **Issues**: [GitHub Issues](https://github.com/luiscnext/mcp-terminal-server/issues)
 - **Security**: See [SECURITY.md](./SECURITY.md) for reporting security issues
-- **Documentation**: Check the [docs/](./docs/) directory
+- **Documentation**: Check the repository for detailed docs
 
 ## ⚡ Performance
 
@@ -328,3 +310,5 @@ MIT License - see [LICENSE](./LICENSE) file for details.
 ---
 
 **⚠️ Security Notice**: This server implements comprehensive security controls but should be used responsibly. Always review commands before execution and monitor audit logs for suspicious activity.
+
+**🎯 Quick Start**: Just add `"npx @modelcontextprotocol/mcp-terminal-server"` to your Claude Desktop config and start using secure terminal commands immediately!
