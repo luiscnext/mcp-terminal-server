@@ -175,7 +175,7 @@ export class SecurityAuditor {
       success: true,
       executionTime,
       outputSize,
-      metadata
+      metadata: metadata || {}
     });
   }
 
@@ -199,7 +199,7 @@ export class SecurityAuditor {
       args,
       success: false,
       errorMessage: reason,
-      metadata
+      metadata: metadata || {}
     });
   }
 
@@ -219,7 +219,7 @@ export class SecurityAuditor {
       toolName,
       success: false,
       errorMessage: `Rate limit exceeded: ${limitType}`,
-      metadata
+      metadata: metadata || {}
     });
   }
 
@@ -238,7 +238,7 @@ export class SecurityAuditor {
       clientId,
       success: false,
       errorMessage: `${activity}: ${details}`,
-      metadata
+      metadata: metadata || {}
     });
   }
 
@@ -260,7 +260,7 @@ export class SecurityAuditor {
       success: false,
       errorMessage: `Validation failed: ${validationType}`,
       metadata: {
-        ...metadata,
+        ...(metadata || {}),
         inputLength: input.length,
         // Don't log the actual input for security
         inputPreview: input.substring(0, 50) + (input.length > 50 ? '...' : '')
@@ -283,7 +283,7 @@ export class SecurityAuditor {
       clientId,
       success: false,
       errorMessage: `Potential credential detected in ${location}: ${credentialType}`,
-      metadata
+      metadata: metadata || {}
     });
   }
 
@@ -303,7 +303,7 @@ export class SecurityAuditor {
       toolName,
       success: false,
       errorMessage: `Path traversal attempt: ${attemptedPath}`,
-      metadata
+      metadata: metadata || {}
     });
   }
 
@@ -325,7 +325,7 @@ export class SecurityAuditor {
       success: false,
       errorMessage: `${injectionType} injection attempt`,
       metadata: {
-        ...metadata,
+        ...(metadata || {}),
         payloadLength: payload.length,
         // Don't log the actual payload for security
         payloadPreview: payload.substring(0, 30) + (payload.length > 30 ? '...' : '')
@@ -364,7 +364,7 @@ export class SecurityAuditor {
       toolName,
       success: false,
       errorMessage: safeErrorMessage,
-      metadata
+      metadata: metadata || {}
     });
 
     // Also log to main logger for debugging
@@ -372,7 +372,7 @@ export class SecurityAuditor {
       clientId,
       toolName,
       error: safeErrorMessage,
-      metadata
+      metadata: metadata || {}
     });
   }
 
@@ -441,9 +441,9 @@ export class SecurityAuditor {
   }
 
   /**
-   * Get audit statistics
+   * Get audit statistics (placeholder implementation)
    */
-  async getAuditStatistics(hours: number = 24): Promise<{
+  async getAuditStatistics(): Promise<{
     totalEvents: number;
     eventsByType: Record<string, number>;
     eventsByRisk: Record<string, number>;
@@ -462,9 +462,9 @@ export class SecurityAuditor {
   }
 
   /**
-   * Export logs for external analysis
+   * Export logs for external analysis (placeholder implementation)
    */
-  async exportLogs(startDate: Date, endDate: Date): Promise<AuditLogEntry[]> {
+  async exportLogs(): Promise<AuditLogEntry[]> {
     // This would typically read from log files or database
     // For now, return empty array
     return [];
