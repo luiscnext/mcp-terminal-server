@@ -1,11 +1,11 @@
 {
-  "name": "@modelcontextprotocol/mcp-terminal-server",
+  "name": "mcp-secure-terminal-server",
   "version": "1.0.0",
   "description": "Secure MCP TypeScript SDK server for safe terminal command execution with Claude Desktop",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "mcp-terminal-server": "dist/server.js"
+    "mcp-secure-terminal-server": "dist/server.js"
   },
   "files": [
     "dist/**/*",
@@ -23,7 +23,7 @@
     "format": "prettier --write src/**/*.ts",
     "prepare": "npm run build",
     "prepublishOnly": "npm run build && npm test",
-    "postinstall": "echo 'MCP Terminal Server installed successfully. Use with Claude Desktop configuration.'"
+    "postinstall": "echo 'MCP Secure Terminal Server installed successfully. Use with Claude Desktop configuration.'"
   },
   "keywords": [
     "mcp",
@@ -77,9 +77,5 @@
   },
   "preferGlobal": true,
   "os": ["darwin", "linux", "win32"],
-  "cpu": ["x64", "arm64"],
-  "funding": {
-    "type": "github",
-    "url": "https://github.com/sponsors/luiscnext"
-  }
+  "cpu": ["x64", "arm64"]
 }
