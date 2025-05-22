@@ -5,12 +5,9 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { SecureCommandExecutor } from "./commands/executor.js";
 import { SecurityAuditor, SecurityEventType } from "./security/audit.js";
-import { CommandRateLimiter } from "./security/rateLimit.js";
-import { sanitizeFilePath, sanitizeInput } from "./security/sanitizer.js";
+import { sanitizeFilePath } from "./security/sanitizer.js";
 import { COMMAND_WHITELIST } from "./commands/whitelist.js";
 import fs from 'fs/promises';
-import path from 'path';
-import os from 'os';
 
 /**
  * Secure MCP Terminal Server
@@ -22,13 +19,11 @@ class SecureMcpTerminalServer {
   private server: McpServer;
   private executor: SecureCommandExecutor;
   private auditor: SecurityAuditor;
-  private rateLimiter: CommandRateLimiter;
 
   constructor() {
     // Initialize security components
     this.executor = SecureCommandExecutor.getInstance();
     this.auditor = SecurityAuditor.getInstance();
-    this.rateLimiter = CommandRateLimiter.getInstance();
 
     // Create MCP server with security-focused configuration
     this.server = new McpServer({
@@ -49,6 +44,7 @@ class SecureMcpTerminalServer {
     // List directory contents safely
     this.server.tool(
       "list_directory",
+      "List directory contents with security validation",
       {
         path: z.string().optional().describe("Directory path to list (defaults to current directory)"),
         includeHidden: z.boolean().optional().describe("Include hidden files and directories"),
@@ -70,12 +66,12 @@ class SecureMcpTerminalServer {
             'list_directory',
             'ls',
             args,
-            { clientId, workingDirectory: dirPath }
+            { clientId, workingDirectory: dirPath || undefined }
           );
 
           return {
             content: [{
-              type: "text",
+              type: "text" as const,
               text: result.success ? result.output : `Error: ${result.error}`
             }],
             isError: !result.success
@@ -89,6 +85,7 @@ class SecureMcpTerminalServer {
     // Get current working directory
     this.server.tool(
       "get_current_directory",
+      "Get the current working directory",
       {},
       async (_, { _meta }) => {
         const clientId = this.getClientId(_meta);
@@ -103,7 +100,7 @@ class SecureMcpTerminalServer {
 
           return {
             content: [{
-              type: "text",
+              type: "text" as const,
               text: result.success ? result.output.trim() : `Error: ${result.error}`
             }],
             isError: !result.success
@@ -117,6 +114,7 @@ class SecureMcpTerminalServer {
     // Execute safe commands from whitelist
     this.server.tool(
       "execute_safe_command",
+      "Execute commands from the security whitelist",
       {
         command: z.string().describe("Command to execute (must be in whitelist)"),
         args: z.array(z.string()).optional().describe("Command arguments"),
@@ -130,12 +128,12 @@ class SecureMcpTerminalServer {
             'execute_safe_command',
             command,
             args,
-            { clientId, workingDirectory }
+            { clientId, workingDirectory: workingDirectory || undefined }
           );
 
           return {
             content: [{
-              type: "text",
+              type: "text" as const,
               text: result.success ? result.output : `Error: ${result.error}`
             }],
             isError: !result.success,
@@ -154,6 +152,7 @@ class SecureMcpTerminalServer {
     // Read file contents safely
     this.server.tool(
       "read_file_safe",
+      "Safely read file contents with size limits",
       {
         filePath: z.string().describe("Path to file to read"),
         maxLines: z.number().optional().describe("Maximum number of lines to read (default: 100)")
@@ -172,7 +171,7 @@ class SecureMcpTerminalServer {
 
           return {
             content: [{
-              type: "text",
+              type: "text" as const,
               text: result.success ? result.output : `Error: ${result.error}`
             }],
             isError: !result.success
@@ -186,6 +185,7 @@ class SecureMcpTerminalServer {
     // Git repository status
     this.server.tool(
       "git_status",
+      "Get Git repository status",
       {
         workingDirectory: z.string().optional().describe("Git repository directory"),
         short: z.boolean().optional().describe("Use short format output")
@@ -201,12 +201,12 @@ class SecureMcpTerminalServer {
             'git_status',
             'git',
             args,
-            { clientId, workingDirectory }
+            { clientId, workingDirectory: workingDirectory || undefined }
           );
 
           return {
             content: [{
-              type: "text",
+              type: "text" as const,
               text: result.success ? result.output : `Error: ${result.error}`
             }],
             isError: !result.success
@@ -220,6 +220,7 @@ class SecureMcpTerminalServer {
     // Count lines, words, characters in files
     this.server.tool(
       "count_file_stats",
+      "Count lines, words, or characters in files",
       {
         filePath: z.string().describe("Path to file to analyze"),
         countType: z.enum(['lines', 'words', 'characters']).optional().describe("Type of count to perform")
@@ -244,7 +245,7 @@ class SecureMcpTerminalServer {
 
           return {
             content: [{
-              type: "text",
+              type: "text" as const,
               text: result.success ? result.output : `Error: ${result.error}`
             }],
             isError: !result.success
@@ -258,6 +259,7 @@ class SecureMcpTerminalServer {
     // Check system information
     this.server.tool(
       "system_info",
+      "Get basic system information",
       {
         infoType: z.enum(['user', 'os', 'system']).optional().describe("Type of system information")
       },
@@ -293,7 +295,7 @@ class SecureMcpTerminalServer {
 
           return {
             content: [{
-              type: "text",
+              type: "text" as const,
               text: result.success ? result.output : `Error: ${result.error}`
             }],
             isError: !result.success
@@ -457,7 +459,7 @@ All operations are logged and subject to security validation.`;
     
     return {
       content: [{
-        type: "text",
+        type: "text" as const,
         text: `Error: ${errorMessage}`
       }],
       isError: true
