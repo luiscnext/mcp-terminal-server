@@ -1,8 +1,8 @@
 {
   "servers": {
     "secure-terminal": {
-      "command": "node",
-      "args": ["/path/to/mcp-terminal-server/dist/server.js"],
+      "command": "npx",
+      "args": ["@modelcontextprotocol/mcp-terminal-server"],
       "env": {},
       "description": "Secure terminal command execution server with comprehensive security controls"
     }
