@@ -1,10 +1,7 @@
 import { spawn } from 'child_process';
-import { promisify } from 'util';
-import path from 'path';
 import { 
   isCommandAllowed, 
   areArgsAllowed, 
-  getCommandDefinition,
   isWorkingDirectorySafe 
 } from './whitelist.js';
 import { 
@@ -18,7 +15,7 @@ import {
   limitOutputLines
 } from '../security/sanitizer.js';
 import { CommandRateLimiter } from '../security/rateLimit.js';
-import { SecurityAuditor, SecurityEventType, RiskLevel } from '../security/audit.js';
+import { SecurityAuditor } from '../security/audit.js';
 
 /**
  * Command execution result
@@ -80,7 +77,7 @@ export class SecureCommandExecutor {
     
     try {
       // Step 1: Input validation and sanitization
-      await this.validateAndSanitizeInput(toolName, command, args, options, clientId);
+      await this.validateAndSanitizeInput(toolName, command, args, clientId);
 
       // Step 2: Rate limiting check
       await this.checkRateLimit(toolName, command, clientId);
@@ -118,7 +115,7 @@ export class SecureCommandExecutor {
       const executionTime = Date.now() - startTime;
       
       // Log error and handle rate limiting for failed attempts
-      await this.handleExecutionError(error, toolName, command, args, clientId, executionTime);
+      await this.handleExecutionError(error, toolName, clientId, executionTime);
       
       // Return safe error result
       return {
@@ -139,7 +136,6 @@ export class SecureCommandExecutor {
     toolName: string,
     command: string,
     args: string[],
-    options: ExecutionOptions,
     clientId: string
   ): Promise<void> {
     // Sanitize command
@@ -339,8 +335,8 @@ export class SecureCommandExecutor {
     // Start with minimal environment
     const safeEnv: Record<string, string> = {
       PATH: '/usr/local/bin:/usr/bin:/bin',
-      HOME: process.env.HOME || '/tmp',
-      USER: process.env.USER || 'unknown',
+      HOME: process.env['HOME'] || '/tmp',
+      USER: process.env['USER'] || 'unknown',
       SHELL: '/bin/sh',
       TERM: 'xterm'
     };
@@ -397,8 +393,6 @@ export class SecureCommandExecutor {
   private async handleExecutionError(
     error: unknown,
     toolName: string,
-    command: string,
-    args: string[],
     clientId: string,
     executionTime: number
   ): Promise<void> {
@@ -464,7 +458,7 @@ export class SecureCommandExecutor {
     const clientId = options.clientId || 'test';
 
     try {
-      await this.validateAndSanitizeInput(toolName, command, args, options, clientId);
+      await this.validateAndSanitizeInput(toolName, command, args, clientId);
       await this.checkRateLimit(toolName, command, clientId);
       await this.validateWorkingDirectory(options.workingDirectory, clientId);
       
